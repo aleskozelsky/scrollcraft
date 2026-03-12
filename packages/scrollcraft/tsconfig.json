@@ -13,13 +13,13 @@
         "forceConsistentCasingInFileNames": true,
         "declaration": true,
         "jsx": "react-jsx",
-        "outDir": "./packages/scrollcraft/dist",
-        "rootDir": "packages/scrollcraft/src",
+        "outDir": "./dist",
+        "rootDir": "./src",
         "baseUrl": ".",
         "resolveJsonModule": true
     },
     "include": [
-        "packages/scrollcraft/src/**/*"
+        "./src/**/*"
     ],
     "exclude": [
         "dist"

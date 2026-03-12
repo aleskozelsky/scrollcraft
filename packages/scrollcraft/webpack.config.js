@@ -93,10 +93,10 @@ module.exports = (env, argv) => {
       ...sharedConfig,
       name: 'core',
       entry: {
-        "scrollcraft": path.resolve(__dirname, 'packages/scrollcraft/src/core/index.ts'),
+        "scrollcraft": path.resolve(__dirname, 'src/core/index.ts'),
       },
       output: {
-        path: path.resolve(__dirname, 'packages/scrollcraft/dist/core'),
+        path: path.resolve(__dirname, 'dist/core'),
         filename: "[name].umd.min.js",
         library: {
           name: 'ScrollCraft',
@@ -115,10 +115,10 @@ module.exports = (env, argv) => {
       ...sharedConfig,
       name: 'react',
       entry: {
-        "scrollcraft-react": path.resolve(__dirname, 'packages/scrollcraft/src/react/index.ts'),
+        "scrollcraft-react": path.resolve(__dirname, 'src/react/index.ts'),
       },
       output: {
-        path: path.resolve(__dirname, 'packages/scrollcraft/dist/react'),
+        path: path.resolve(__dirname, 'dist/react'),
         filename: "index.js",
         library: {
           name: 'ScrollCraftReact',

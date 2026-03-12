@@ -3,15 +3,15 @@
         "target": "ESNext",
         "module": "CommonJS",
         "moduleResolution": "node",
-        "outDir": "./packages/scrollcraft/dist",
-        "rootDir": "packages/scrollcraft/src",
+        "outDir": "./dist",
+        "rootDir": "./src",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
         "resolveJsonModule": true
     },
     "include": [
-        "packages/scrollcraft/src/cli/**/*",
-        "packages/scrollcraft/src/core/types.ts"
+        "./src/cli/**/*",
+        "./src/core/types.ts"
     ]
 }

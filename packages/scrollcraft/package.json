@@ -33,13 +33,13 @@
   "scripts": {
     "build": "npm run sync-readme && npm run build:js && npm run build:types && npm run build:cli",
     "sync-readme": "node -e \"fs.copyFileSync('../../README.md', './README.md')\"",
-    "build:js": "webpack --config ../../webpack.config.js --mode production",
-    "build:types": "tsc --project ../../tsconfig.json --emitDeclarationOnly",
-    "build:cli": "tsc --project ../../tsconfig.cli.json && node scripts/make-executable.cjs",
+    "build:js": "webpack --config webpack.config.js --mode production",
+    "build:types": "tsc --project tsconfig.json --emitDeclarationOnly",
+    "build:cli": "tsc --project tsconfig.cli.json && node scripts/make-executable.cjs",
     "dev": "concurrently -n JS,CLI,TYP -c \"blue,yellow,magenta\" \"npm:dev:js\" \"npm:dev:cli\" \"npm:dev:types\"",
-    "dev:js": "webpack --config ../../webpack.config.js --mode development --watch",
-    "dev:cli": "tsc --project ../../tsconfig.cli.json --watch --preserveWatchOutput",
-    "dev:types": "tsc --project ../../tsconfig.json --emitDeclarationOnly --watch --preserveWatchOutput"
+    "dev:js": "webpack --config webpack.config.js --mode development --watch",
+    "dev:cli": "tsc --project tsconfig.cli.json --watch --preserveWatchOutput",
+    "dev:types": "tsc --project tsconfig.json --emitDeclarationOnly --watch --preserveWatchOutput"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
