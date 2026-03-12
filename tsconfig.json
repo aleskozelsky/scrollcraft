@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "lib": [
+            "DOM",
+            "ESNext"
+        ],
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "declaration": true,
+        "jsx": "react-jsx",
+        "outDir": "./packages/scrollcraft/dist",
+        "rootDir": "packages/scrollcraft/src",
+        "baseUrl": ".",
+        "resolveJsonModule": true
+    },
+    "include": [
+        "packages/scrollcraft/src/**/*"
+    ],
+    "exclude": [
+        "dist"
+    ]
+}

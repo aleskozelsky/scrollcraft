@@ -1,0 +1,33 @@
+{
+    "name": "scrollcraft-workspace",
+    "private": true,
+    "description": "Monorepo workspace for ScrollCraft development.",
+    "workspaces": [
+        "packages/docs",
+        "packages/examples/*",
+        "packages/scrollcraft"
+    ],
+    "scripts": {
+        "build": "npm run build -w scrollcraft",
+        "dev": "npm run dev -w scrollcraft",
+        "test": "npm test --workspaces"
+    },
+    "devDependencies": {
+        "@types/fluent-ffmpeg": "^2.1.28",
+        "@types/node": "^20.0.0",
+        "@types/react": "^18.0.0",
+        "@types/react-dom": "^18.0.0",
+        "chalk": "^4.1.2",
+        "clean-webpack-plugin": "^4.0.0",
+        "concurrently": "^8.2.0",
+        "css-loader": "^6.8.0",
+        "style-loader": "^3.3.0",
+        "terser-webpack-plugin": "^5.3.10",
+        "ts-loader": "^9.5.0",
+        "typescript": "^5.3.0",
+        "webpack": "^5.90.0",
+        "webpack-cli": "^5.1.0",
+        "@types/fs-extra": "^11.0.4",
+        "@types/sharp": "^0.31.1"
+    }
+}
