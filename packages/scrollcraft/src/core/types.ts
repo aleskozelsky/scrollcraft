@@ -16,6 +16,8 @@ export interface ProjectSettings {
     fps: number;
     baseResolution: { width: number; height: number };
     scrollMode: 'vh' | 'px'; // Whether durations are measured in viewport height or pixels
+    basePath?: string; // Optional base path for resolving relative asset URLs
+    scrub?: number; // Smooth delay/interpolation factor
 }
 
 /**
@@ -34,9 +36,8 @@ export interface AssetVariant {
     aspectRatio: string; // e.g. "9:16" or "16:9"
     frameCount: number;
     hasDepthMap?: boolean;
-    // Subject Tracking Data: Frame-by-frame (x,y) coordinates of the main object
-    // This allows "pinning" content to a moving subject regardless of crop.
-    subjectTracking?: SubjectFrameData[];
+    // Subject Tracking Data
+    subjects?: string[]; // Array of tracked subject IDs that have corresponding tracking-<id>.json files
 }
 
 export interface SubjectFrameData {

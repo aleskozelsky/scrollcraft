@@ -90,6 +90,10 @@ export class AssetProcessor {
                 });
             }
 
+            // Extract tracking data into its own file
+            const trackingPath = path.join(variantDir, 'tracking-main.json');
+            await fs.writeJson(trackingPath, variantTracking, { spaces: 2 });
+
             variants.push({
                 id: config.id,
                 media: config.media,
@@ -97,7 +101,7 @@ export class AssetProcessor {
                 aspectRatio: config.id === 'mobile' ? '9:16' : '16:9',
                 frameCount: framesToProcess.length,
                 hasDepthMap: options.hasDepth,
-                subjectTracking: variantTracking
+                subjects: ['main']
             });
         }
 

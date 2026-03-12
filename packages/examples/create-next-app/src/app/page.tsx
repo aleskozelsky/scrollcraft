@@ -1,10 +1,6 @@
 "use client";
 
 import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer, useScrollCraft } from 'scrollcraft/react';
-import { ProjectConfiguration } from 'scrollcraft/core';
-import sampleConfigData from '../../public/scft-project-apple/scrollcraft.json';
-
-const sampleConfig = sampleConfigData as unknown as ProjectConfiguration; // to avoid typescript errors
 
 const AppleInfo = () => {
   const { progress, frame } = useScrollCraft();
@@ -28,21 +24,27 @@ const AppleInfo = () => {
 
 export default function Home() {
 
-
   return (
-    <main style={{ height: '400vh', background: '#8b2222ff' }}>
+    <main style={{ background: '#8b2222ff', paddingBottom: '100vh' }}>
 
-      <ScrollCraftProvider project={sampleConfig}>
+      {/* Intro section */}
+      <section style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+        <h1>Welcome to ScrollCraft 2.0</h1>
+        <p style={{ position: 'absolute', bottom: '10vh' }}>↓ SCROLL TO EXPLORE</p>
+      </section>
 
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1 }}>
-          <ScrollCraftCanvas
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-
-          />
+      {/* The Scroll Sequence */}
+      <ScrollCraftProvider
+        project="/scrollcraft-project-apple/scrollcraft.json"
+        containerHeight="400vh"
+        canvasHeight="100vh"
+        offset={["start end", "end start"]} // motion.dev tracking offsets
+      >
+        <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+          <ScrollCraftCanvas />
         </div>
 
-
-        <SubjectLayer offset={{ x: 0, y: -0 }}>
+        <SubjectLayer id="main" offset={{ x: 0, y: 0 }}>
           <div style={{
             padding: '12px 24px',
             background: 'rgba(255, 255, 255, 0.1)',
@@ -52,28 +54,22 @@ export default function Home() {
             color: 'white',
             fontWeight: 'bold',
             boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap'
           }}>
-            🍎 Apple Lens x
+            🍎 Apple Lens Target
           </div>
         </SubjectLayer>
 
         <AppleInfo />
 
-
-        <div style={{
-          position: 'absolute',
-          top: '90vh',
-          width: '100%',
-          textAlign: 'center',
-          color: 'white',
-          opacity: 0.5,
-          zIndex: 10
-        }}>
-          ↓ SCROLL TO EXPLORE
-        </div>
-
       </ScrollCraftProvider>
+
+      {/* Outro section */}
+      <section style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+        <h2>End of sequence</h2>
+      </section>
+
     </main>
   );
 }

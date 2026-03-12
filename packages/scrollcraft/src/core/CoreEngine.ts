@@ -1,4 +1,4 @@
-import { ProjectConfiguration, SequenceAsset, AssetVariant } from './types';
+import { ProjectConfiguration, SequenceAsset, AssetVariant, SubjectFrameData } from './types';
 import { WebGLRenderer } from './WebGLRenderer';
 
 /**
@@ -15,21 +15,83 @@ export class CoreEngine {
     private ctx: CanvasRenderingContext2D | null = null;
     private renderer: WebGLRenderer | null = null;
 
+    public basePath: string = '';
+
+    // Playback State
+    private targetProgress: number = 0;
+    private currentProgress: number = 0;
+    private rafId: number = 0;
+    private destroyed: boolean = false;
+
     // Internal Cache
     private imageCache: Map<string, HTMLImageElement> = new Map();
     private depthCache: Map<string, HTMLImageElement> = new Map();
     private scrollTimeout: any = null;
+    private trackingDataCache: Map<string, SubjectFrameData[]> = new Map();
+
+    // Event hooks
+    public onFrameChange?: (frame: number, progress: number) => void;
+
+    private boundResize: () => void;
 
     constructor(config: ProjectConfiguration) {
         this.config = config;
+        this.basePath = config.settings.basePath || '';
         this.detectBestVariant();
 
-        // Listen for window resize to swap variants (Adaptive Rendering)
-        window.addEventListener('resize', () => {
+        this.boundResize = () => {
             this.detectBestVariant();
             this.resizeCanvas();
             this.render(); // Re-render current frame on resize
-        });
+        };
+
+        // Listen for window resize to swap variants (Adaptive Rendering)
+        window.addEventListener('resize', this.boundResize);
+
+        // Start render loop
+        this.updateLoop = this.updateLoop.bind(this);
+        this.rafId = requestAnimationFrame(this.updateLoop);
+    }
+
+    public destroy() {
+        this.destroyed = true;
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        window.removeEventListener('resize', this.boundResize);
+        if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+        this.clearCache();
+        this.trackingDataCache.clear();
+        this.canvas = null;
+        this.ctx = null;
+        this.renderer = null;
+        this.onFrameChange = undefined;
+    }
+
+    public static async init(container: HTMLElement, configUrl: string): Promise<CoreEngine> {
+        const res = await fetch(configUrl);
+        if (!res.ok) throw new Error(`Failed to load config: ${res.statusText}`);
+        const config: ProjectConfiguration = await res.json();
+
+        // Auto-detect base path from URL
+        const basePath = configUrl.substring(0, configUrl.lastIndexOf('/'));
+        if (!config.settings) {
+            config.settings = { fps: 30, baseResolution: { width: 1920, height: 1080 }, scrollMode: 'vh' };
+        }
+        config.settings.basePath = config.settings.basePath || basePath;
+
+        const engine = new CoreEngine(config);
+
+        let canvas = container.querySelector('canvas');
+        if (!canvas) {
+            canvas = document.createElement('canvas');
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.display = 'block';
+            canvas.style.objectFit = 'cover';
+            container.appendChild(canvas);
+        }
+
+        engine.attachCanvas(canvas);
+        return engine;
     }
 
     /**
@@ -104,17 +166,44 @@ export class CoreEngine {
 
     /**
      * THE PLAYER ENGINE
-     * Maps global scroll progress (0-1) to local scene frames.
+     * Sets the target scroll progress. Actual rendering interpolates to this value.
      */
     public update(progress: number) {
+        this.targetProgress = Math.max(0, Math.min(1, progress));
+    }
+
+    private updateLoop() {
+        if (this.destroyed) return;
+        this.rafId = requestAnimationFrame(this.updateLoop);
+
+        const scrub = this.config.settings.scrub || 0;
+        
+        if (scrub > 0) {
+            // Smooth delay (lower factor = more delay)
+            const factor = Math.max(0.01, 1 - scrub);
+            this.currentProgress += (this.targetProgress - this.currentProgress) * factor;
+        } else {
+            this.currentProgress = this.targetProgress;
+        }
+
+        if (Math.abs(this.targetProgress - this.currentProgress) < 0.0001) {
+            this.currentProgress = this.targetProgress;
+        }
+
+        this.calculateFrame(this.currentProgress);
+    }
+
+    private calculateFrame(progress: number) {
         const scene = this.config.timeline.scenes[0];
         if (!scene) return;
 
         const totalFrames = scene.assetRange[1] - scene.assetRange[0];
         const localFrame = Math.floor(scene.assetRange[0] + (progress * totalFrames));
+        // clamp frame to valid range
+        const finalFrame = Math.max(0, Math.min(localFrame, scene.assetRange[1]));
 
-        if (localFrame !== this.currentFrame) {
-            this.currentFrame = localFrame;
+        if (finalFrame !== this.currentFrame) {
+            this.currentFrame = finalFrame;
             this.render();
             // Predictive preloading
             this.getImage(this.currentFrame + 5);
@@ -125,18 +214,47 @@ export class CoreEngine {
             this.scrollTimeout = setTimeout(() => {
                 this.loadDepthMap(this.currentFrame);
             }, 100);
-        }
 
-        return {
-            frame: this.currentFrame,
-            subjectCoords: this.getSubjectCoords(this.currentFrame)
-        };
+            if (this.onFrameChange) {
+                this.onFrameChange(this.currentFrame, progress);
+            }
+        }
     }
 
-    private getSubjectCoords(frame: number) {
-        if (!this.activeVariant?.subjectTracking) return { x: 0.5, y: 0.5 };
-        const trackData = this.activeVariant.subjectTracking.find(f => f.frame === frame);
-        return trackData ? { x: trackData.x, y: trackData.y } : { x: 0.5, y: 0.5 };
+    /**
+     * LOAD SUBJECT TRACKING (On-Demand)
+     */
+    public async loadTrackingData(subjectId: string): Promise<void> {
+        if (!this.activeVariant) return;
+        if (!this.activeVariant.subjects?.includes(subjectId)) {
+            console.warn(`[CoreEngine] Subject ${subjectId} not found in active variant ${this.activeVariant.id}`);
+            return;
+        }
+
+        const cacheKey = `${this.activeVariant.id}_${subjectId}`;
+        if (this.trackingDataCache.has(cacheKey)) return;
+
+        try {
+            const prefix = this.basePath ? `${this.basePath}/` : '';
+            const url = `${prefix}${this.activeVariant.path}/tracking-${subjectId}.json`;
+            console.log(`[CoreEngine] Fetching tracking data: ${url}`);
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(res.statusText);
+            const data: SubjectFrameData[] = await res.json();
+            this.trackingDataCache.set(cacheKey, data);
+        } catch (e) {
+            console.error(`[CoreEngine] Failed to load tracking data for ${subjectId}`, e);
+        }
+    }
+
+    public getTrackedCoords(subjectId: string, frame: number): { x: number, y: number, scale?: number } {
+        if (!this.activeVariant) return { x: 0.5, y: 0.5 };
+        const cacheKey = `${this.activeVariant.id}_${subjectId}`;
+        const data = this.trackingDataCache.get(cacheKey);
+        if (!data) return { x: 0.5, y: 0.5 };
+
+        const trackData = data.find(f => f.frame === frame);
+        return trackData ? { x: trackData.x, y: trackData.y, scale: trackData.scale } : { x: 0.5, y: 0.5 };
     }
 
     /**
@@ -193,9 +311,10 @@ export class CoreEngine {
         const key = `${this.activeVariant.id}_${frame}`;
         if (this.imageCache.has(key)) return this.imageCache.get(key)!;
 
+        const prefix = this.basePath ? `${this.basePath}/` : '';
         const img = new Image();
         img.crossOrigin = "anonymous";
-        img.src = `${this.activeVariant.path}/index_${frame}.webp`;
+        img.src = `${prefix}${this.activeVariant.path}/index_${frame}.webp`;
         img.onload = () => {
             if (this.currentFrame === frame) this.render();
         };
@@ -220,10 +339,11 @@ export class CoreEngine {
         const key = `${this.activeVariant.id}_depth_${frame}`;
         if (this.depthCache.has(key)) return this.depthCache.get(key)!;
 
-        console.log(`[CoreEngine] Downloading: ${this.activeVariant.path}/index_${frame}_depth.webp`);
+        const prefix = this.basePath ? `${this.basePath}/` : '';
+        console.log(`[CoreEngine] Downloading: ${prefix}${this.activeVariant.path}/index_${frame}_depth.webp`);
         const img = new Image();
         img.crossOrigin = "anonymous";
-        img.src = `${this.activeVariant.path}/index_${frame}_depth.webp`; // Matching user's request: frame_0_depth
+        img.src = `${prefix}${this.activeVariant.path}/index_${frame}_depth.webp`; // Matching user's request: frame_0_depth
         img.onload = () => {
             console.log(`[CoreEngine] Depth map loaded for frame: ${frame}`);
             if (this.currentFrame === frame) this.render();
