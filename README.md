@@ -37,13 +37,13 @@ const App = () => (
 Choose your path based on your role:
 
 ### 👤 For Humans
-- [**Core Architecture**](packages/docs/architecture.md): Understand the state-snapshot engine.
-- [**Asset Pipeline**](packages/docs/asset-pipeline.md): Learn how to use the CLI and AI tracking.
-- [**React Hooks**](packages/docs/react-integration.md): Build custom interactive components.
+- [**Core Architecture**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/architecture.md): Understand the state-snapshot engine.
+- [**Asset Pipeline**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/asset-pipeline.md): Learn how to use the CLI and AI tracking.
+- [**React Hooks**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/react-integration.md): Build custom interactive components.
 
 ### 🤖 For AI Agents
-- [**AGENTS.md**](AGENTS.md): Technical standard operating procedures for the repository.
-- [**AI Integration Protocol**](packages/docs/ai-integration.md): How to prompt agents to build scenes for you.
+- [**AGENTS.md**](https://github.com/aleskozelsky/scrollcraft/blob/main/AGENTS.md): Technical standard operating procedures for the repository.
+- [**AI Integration Protocol**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/ai-integration.md): How to prompt agents to build scenes for you.
 
 ---
 
