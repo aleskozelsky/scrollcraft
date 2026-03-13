@@ -3,6 +3,8 @@ import * as path from 'path';
 import sharp from 'sharp';
 import { ProjectConfiguration, AssetVariant, SubjectFrameData } from '../core/types';
 
+const pkg = require('../../package.json');
+
 /**
  * LOCAL ASSET PROCESSOR
  * 
@@ -123,7 +125,7 @@ export class AssetProcessor {
      */
     async saveConfig(variants: AssetVariant[]) {
         const config: ProjectConfiguration = {
-            version: "2.0.1",
+            version: pkg.version,
             settings: {
                 fps: 30,
                 baseResolution: { width: 1920, height: 1080 },
