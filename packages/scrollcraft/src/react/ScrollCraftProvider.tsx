@@ -14,13 +14,13 @@ const ScrollCraftContext = createContext<SCFTContext | null>(null);
 export interface ScrollCraftProviderProps {
     project: ProjectConfiguration | string;
     children: React.ReactNode;
-    containerHeight?: string; 
+    containerHeight?: string;
     canvasHeight?: string;
     offset?: any; // e.g. ["start end", "end start"]
 }
 
-export const ScrollCraftProvider: React.FC<ScrollCraftProviderProps> = ({ 
-    project, 
+export const ScrollCraftProvider: React.FC<ScrollCraftProviderProps> = ({
+    project,
     children,
     containerHeight = '400vh',
     canvasHeight = '100vh',
@@ -76,7 +76,7 @@ export const ScrollCraftProvider: React.FC<ScrollCraftProviderProps> = ({
     // Setup Motion Scroll integration
     useEffect(() => {
         if (!engineReady || !containerRef.current || !engineRef.current) return;
-        
+
         const controls = scroll(
             (progress: number) => {
                 if (engineRef.current) {
@@ -132,7 +132,7 @@ export const ScrollCraftCanvas: React.FC<{ style?: React.CSSProperties }> = ({ s
 export const SubjectLayer: React.FC<{ id?: string; offset?: { x: number; y: number }; children: React.ReactNode }> = ({ id = 'main', offset = { x: 0, y: 0 }, children }) => {
     const context = useContext(ScrollCraftContext);
     const [coords, setCoords] = useState({ x: 0.5, y: 0.5 });
-    
+
     useEffect(() => {
         if (context?.engine && context.frame >= 0) {
             context.engine.loadTrackingData(id).then(() => {
@@ -151,7 +151,7 @@ export const SubjectLayer: React.FC<{ id?: string; offset?: { x: number; y: numb
         transform: 'translate(-50%, -50%)',
         pointerEvents: 'auto',
         zIndex: 10,
-        transition: 'left 0.05s linear, top 0.05s linear' // Sub-frame smoothing
+        transition: 'left 0.5s linear, top 0.5s linear' // Sub-frame smoothing (should be somehow related to scrub)
     };
 
     return <div style={style}>{children}</div>;
