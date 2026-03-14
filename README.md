@@ -1,4 +1,4 @@
-# 🎞️ ScrollCraft 
+# ScrollCraft 
 
 **Transform media into interactive web experiences.**
 
@@ -6,7 +6,15 @@ ScrollCraft is a modern animation SDK built for the era of high-performance, age
 
 ---
 
-## 🚀 Quick Start
+## Installation
+
+```bash
+npm install scrollcraft
+```
+
+---
+
+## Quick Start
 
 Initialize your project:
 
@@ -40,22 +48,22 @@ const App = () => (
 
 ---
 
-## 📖 Documentation & Guides
+## Documentation & Guides
 
 Choose your path based on your role:
 
 ### 👤 For Humans
-- [**Core Architecture**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/architecture.md): Understand the state-snapshot engine.
-- [**Asset Pipeline**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/asset-pipeline.md): Learn how to use the CLI and AI tracking.
-- [**React Hooks**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/react-integration.md): Build custom interactive components.
+- [**Core Architecture**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/docs/architecture/page.md): Understand the state-snapshot engine.
+- [**Asset Pipeline**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/docs/asset-pipeline/page.md): Learn how to use the CLI and AI tracking.
+- [**React Hooks**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/docs/react-integration/page.md): Build custom interactive components.
 
 ### 🤖 For AI Agents
 - [**AGENTS.md**](https://github.com/aleskozelsky/scrollcraft/blob/main/AGENTS.md): Technical standard operating procedures for the repository.
-- [**AI Integration Protocol**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/ai-integration.md): How to prompt agents to build scenes for you.
+- [**AI Integration Protocol**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/docs/ai-integration/page.md): How to prompt agents to build scenes for you.
 
 ---
 
-## 🛠️ Performance & Tech
+## Performance & Tech
 - **WebGL Accelerated**: High-FPS rendering even for 4K sequences.
 - **AI Subject Tracking**: Automatic (x,y) pinning via SAM 3.
 - **Mouse-Interactive Parallax**: Automatic 3D depth map generation and rendering.
