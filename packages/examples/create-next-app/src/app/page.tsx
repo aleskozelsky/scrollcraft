@@ -39,9 +39,12 @@ export default function Home() {
         containerHeight="400vh"
         canvasHeight="100vh"
         offset={["start end", "end start"]} // motion.dev tracking offsets
+      //scrub={0.5}
       >
         <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-          <ScrollCraftCanvas />
+          <ScrollCraftCanvas
+          // style={{ height: '100vh', width: '100vw' }}
+          />
         </div>
 
         <SubjectLayer id="main" offset={{ x: 0, y: 0 }}>
