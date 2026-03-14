@@ -1,6 +1,6 @@
 # React Integration
 
-The ScrollCraft 2.0 React library is a thin, high-performance wrapper around the Core Engine.
+The ScrollCraft React library is a thin, high-performance wrapper around the Core Engine.
 
 ## 1. The Provider Pattern
 
@@ -33,7 +33,7 @@ function App() {
 
 ---
 
-In v2.0, the rendering engine is decoupled from the provider. You must include a `<ScrollCraftCanvas />` to see your images.
+The rendering engine is decoupled from the provider. You must include a `<ScrollCraftCanvas />` to see your images.
 
 ### Key Props:
 - **`style`**: Standard React styles. Use `objectFit: 'cover'` to ensure the sequence behaves like a background.

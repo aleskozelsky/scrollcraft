@@ -20,7 +20,7 @@ The engine expects a `ProjectConfiguration` object (defined in `src/core/types.t
 
 ## 2. Decoupled Rendering Pipeline
 
-In v2.0, state management is separated from pixels.
+State management is separated from pixels.
 
 1.  **Core Engine**: A non-UI class that manages the `scroll -> frame` math, image preloading, and subject tracking coordinates.
 2.  **React Provider**: Wraps the Engine in a reactive context.

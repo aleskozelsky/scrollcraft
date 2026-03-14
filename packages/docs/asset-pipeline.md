@@ -1,6 +1,6 @@
 # Asset Pipeline: The Intelligence Factor
 
-The ScrollCraft 2.0 Asset Pipeline is designed to do the "hard work" of segmentation, tracking, and optimization using high-end AI models.
+The ScrollCraft Asset Pipeline is designed to do the "hard work" of segmentation, tracking, and optimization using high-end AI models.
 
 ## 1. The One-Step Creation
 

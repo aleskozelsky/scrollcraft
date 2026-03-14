@@ -1,6 +1,6 @@
 # AI Agent Workflow
 
-ScrollCraft 2.0 is built for **Agent-Led Development**. The goal is to move from "writing code" to "orchestrating workflows."
+ScrollCraft is built for **Agent-Led Development**. The goal is to move from "writing code" to "orchestrating workflows."
 
 ## 1. The Two-Phase Workflow
 
