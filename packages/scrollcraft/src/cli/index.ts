@@ -8,8 +8,80 @@ import { execSync } from 'child_process';
 import ffmpegStatic from 'ffmpeg-static';
 import { FalService } from './fal-service';
 import { AssetProcessor } from './processor';
+import * as readline from 'readline';
+import 'dotenv/config';
 
 const pkg = require('../../package.json');
+
+/**
+ * VARIANT PRESETS & MEDIA QUERY BUILDER
+ */
+const DEVICE_PRESETS: Record<string, { width: number; height: number; threshold: number }> = {
+  mobile:  { width: 720,  height: 1280, threshold: 600 },
+  tablet:  { width: 1024, height: 1366, threshold: 1024 },
+  laptop:  { width: 1440, height: 900,  threshold: 1440 },
+  desktop: { width: 1920, height: 1080, threshold: 1920 },
+  '4k':    { width: 3840, height: 2160, threshold: 99999 },
+};
+
+function buildVariantsFromIds(input: (string | number | any)[]): any[] {
+  const result: any[] = [];
+  const orientations: ('portrait' | 'landscape')[] = ['portrait', 'landscape'];
+
+  // 1. Process each "Target" resolution
+  input.forEach(item => {
+    let res = 0;
+    if (typeof item === 'number') res = item;
+    else if (typeof item === 'string') res = parseInt(item);
+    else if (item.height) res = item.height; // Assume height is the defining metric
+
+    if (!res || isNaN(res)) return;
+
+    orientations.forEach(orient => {
+      const isPortrait = orient === 'portrait';
+      const width = isPortrait ? res : Math.round(res * (16 / 9));
+      const height = isPortrait ? Math.round(res * (16 / 9)) : res;
+      
+      result.push({
+        id: `${res}p_${orient.substring(0, 1)}`,
+        width,
+        height,
+        orientation: orient,
+        aspectRatio: isPortrait ? '9:16' : '16:9',
+        media: `(orientation: ${orient})` // Minimal fallback
+      });
+    });
+  });
+
+  // 2. Sort by height (ascending) so the engine finds the first one that fits
+  return result.sort((a, b) => a.height - b.height);
+}
+
+/**
+ * CONFIG LOADER
+ * Looks for scrollcraft.config.js/ts in the current working directory.
+ */
+async function loadProjectConfig(): Promise<any> {
+  const possiblePaths = [
+    path.join(process.cwd(), 'scrollcraft.cli.config.js'),
+    path.join(process.cwd(), 'scrollcraft.cli.config.cjs'),
+    path.join(process.cwd(), 'scrollcraft.cli.config.ts')
+  ];
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        // For simplicity in CLI we handle commonjs/esm basics
+        // If it's TS, it might need jiti or ts-node, but let's assume JS for now
+        // or use a simple dynamic import if supported.
+        return require(p);
+      } catch (e) {
+        console.warn(chalk.yellow(`⚠️  Found config at ${p} but failed to load it. Skipping...`));
+      }
+    }
+  }
+  return null;
+}
 
 /**
  * Robust FFmpeg Detection
@@ -35,16 +107,35 @@ program
   .description('ScrollCraft CLI - Immersive Web SDK')
   .version(pkg.version);
 
+/**
+ * Interactive Helper
+ */
+async function prompt(question: string, defaultValue?: string): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  return new Promise(resolve => {
+    rl.question(`${chalk.cyan('?')} ${question}${defaultValue ? ` (${defaultValue})` : ''}: `, (answer) => {
+      rl.close();
+      resolve(answer.trim() || defaultValue || '');
+    });
+  });
+}
+
 program
   .command('create')
   .description('ONE-STEP: Transform video/images into a responsive ScrollCraft')
-  .argument('<input>', 'Path to input video or directory of images')
-  .option('-o, --output <dir>', 'Output directory', './scrollcraft-project')
-  .option('-p, --prompt <text>', 'Text prompt for subject tracking', 'main subject')
+  .argument('[input]', 'Path to input video or directory of images')
+  .option('-o, --output <dir>', 'Output directory (deprecated, use --name)')
+  .option('-p, --track <text>', 'Text prompt for subject tracking', 'main subject')
+  .option('-n, --name <string>', 'Name of the project')
+  .option('-v, --variants <string>', 'Comma-separated target resolutions (e.g. 720,1080)')
   .option('-s, --step <number>', 'Process every Nth frame (default: 1)', '1')
   .option('--cloud', 'Use Fal.ai for tracking and refinement', false)
   .option('--depth', 'Generate a 3D depth map for the displacement effect (Requires --cloud)', false)
-  .action(async (input: string, opts: { output: string, prompt: string, cloud: boolean, step: string, depth: boolean }) => {
+  .action(async (inputArg: string | undefined, opts: { output?: string, track: string, cloud: boolean, step: string, depth: boolean, name?: string, variants?: string }) => {
     console.log(chalk.bold.blue('\n🎞️  ScrollCraft Asset Pipeline\n'));
 
     // 0. PRE-FLIGHT CHECK
@@ -56,9 +147,67 @@ program
       process.exit(1);
     }
 
-    const outDir = path.resolve(opts.output);
+    const projectConfig = await loadProjectConfig();
+    let input = inputArg;
+    let track = opts.track;
+    let projectName = opts.name;
+    let useCloud = opts.cloud;
+    let customVariants = projectConfig?.variants || (opts.variants ? buildVariantsFromIds(opts.variants.split(',')) : null);
+
+    // 1. INPUT VALIDATION (Immediate)
+    if (!input) {
+      input = await prompt('Path to input video or directory of images');
+    }
+
+    if (!input || !fs.existsSync(input)) {
+      console.error(chalk.red(`\n❌ Error: Input path "${input || ''}" does not exist.`));
+      process.exit(1);
+    }
+
+    // 2. PROJECT NAME & SETTINGS
+    if (!projectName) {
+      projectName = await prompt('Project name', 'scrollcraft-project');
+    }
+
+    let step = parseInt(opts.step) || 1;
+    if (!inputArg) {
+      const stepInput = await prompt('Process every Nth frame (Step size)', '1');
+      step = parseInt(stepInput) || 1;
+    }
+
+    // Interactive AI Decision
+    if (!useCloud && !inputArg) {
+      const aiChoice = await prompt('Use AI Cloud for tracking/depth? (requires FAL_KEY) [y/N]', 'n');
+      useCloud = aiChoice.toLowerCase() === 'y';
+    }
+
+    // Interactive Variant Selection (if not in config)
+    if (!customVariants && !inputArg) {
+      console.log(chalk.cyan('\n📱 Resolution Targets:'));
+      console.log(chalk.dim('Enter the base vertical/horizontal resolution (e.g. 720, 1080, 2160)'));
+      console.log(chalk.dim('We will generate both Portrait (9:16) and Landscape (16:9) pairs.'));
+      const selection = await prompt('Target Resolutions (comma separated)', '720, 1080');
+      customVariants = buildVariantsFromIds(selection.split(','));
+    } else if (customVariants && typeof customVariants[0] !== 'object') {
+      // Handle simple numeric array in config: variants: [720, 1080]
+      customVariants = buildVariantsFromIds(customVariants);
+    }
+
+    if (useCloud) {
+      if (!process.env.FAL_KEY) {
+        console.log(chalk.yellow('\n⚠️  FAL_KEY not found in environment.'));
+        const key = await prompt('Please enter your Fal.ai API Key (or press enter if you will add it to .env)');
+        if (key) process.env.FAL_KEY = key;
+      }
+
+      if (!opts.track || opts.track === 'main subject') {
+        const customTrack = await prompt('What subject should we track?', 'main subject');
+        track = customTrack;
+      }
+    }
+
+    const outDir = path.resolve(opts.output || projectName!);
     const tempDir = path.join(outDir, '.temp-frames');
-    const step = parseInt(opts.step) || 1;
 
     try {
       await fs.ensureDir(outDir);
@@ -67,15 +216,18 @@ program
       // 1. FRAME EXTRACTION
       if (fs.statSync(input).isFile()) {
         console.log(chalk.yellow(`📦 Extracting frames from video: ${input}`));
-        // Extract 30 frames per second (matching our default)
-        // Using the robust path discovered in pre-flight
-        execSync(`"${ffmpegPath}" -i "${input}" -vf "fps=30" "${tempDir}/frame_%04d.png"`, { stdio: 'inherit' });
+        // Default extraction: ALL frames
+        execSync(`"${ffmpegPath}" -i "${input}" "${tempDir}/frame_%04d.png"`, { stdio: 'inherit' });
+
+        // COPY SOURCE MEDIA
+        console.log(chalk.dim(`📂 Keeping source media...`));
+        await fs.copy(input, path.join(outDir, 'source_video.mp4'));
       } else {
         console.log(chalk.yellow(`📂 Using images from: ${input}`));
 
-        if (opts.cloud || opts.depth) {
+        if (useCloud || opts.depth) {
           console.error(chalk.red('\n❌ AI Cloud features (tracking/depth) currently require a video file as input.'));
-          console.log(chalk.yellow('To use a directory of images, please use local mode (disable --cloud and --depth).'));
+          console.log(chalk.yellow('To use a directory of images, please use local mode (disable AI during prompts or don\'t use --cloud).'));
           process.exit(1);
         }
 
@@ -99,11 +251,11 @@ program
       let trackingData = [];
       let hasDepth = false;
 
-      if (opts.cloud) {
+      if (useCloud) {
         const fal = new FalService();
 
         // Tracking
-        trackingData = await fal.trackSubject(input, opts.prompt);
+        trackingData = await fal.trackSubject(input, track);
 
         // Depth Map
         if (opts.depth) {
@@ -116,7 +268,7 @@ program
           await fs.writeFile(depthVideoPath, Buffer.from(arrayBuffer));
 
           console.log(chalk.yellow(`📦 Extracting depth frames...`));
-          execSync(`"${ffmpegPath}" -i "${depthVideoPath}" -vf "fps=30" "${tempDir}/depth_%04d.png"`, { stdio: 'inherit' });
+          execSync(`"${ffmpegPath}" -i "${depthVideoPath}" "${tempDir}/depth_%04d.png"`, { stdio: 'inherit' });
           hasDepth = true;
         }
       } else {
@@ -127,7 +279,7 @@ program
 
       // 3. VARIANT GENERATION (Mobile/Desktop)
       const processor = new AssetProcessor(outDir);
-      const variants = await processor.processVariants(tempDir, trackingData, { step, hasDepth });
+      const variants = await processor.processVariants(tempDir, trackingData, { step, hasDepth, variants: customVariants });
 
       // 4. CLEANUP & SAVE
       await processor.saveConfig(variants);
@@ -142,6 +294,31 @@ program
       console.error(chalk.red(`\n❌ Error: ${err.message}`));
       process.exit(1);
     }
+  });
+
+// NEW UPDATE COMMAND
+program
+  .command('update')
+  .description('Rerun extraction and tracking on an existing project')
+  .argument('<dir>', 'Project directory')
+  .option('-p, --track <text>', 'Additional subject to track')
+  .action(async (dir: string, opts: { track?: string }) => {
+    console.log(chalk.bold.yellow('\n♻️  ScrollCraft Update Pipeline\n'));
+    const projectPath = path.resolve(dir);
+    const configPath = path.join(projectPath, 'scrollcraft.json');
+
+    if (!fs.existsSync(configPath)) {
+      console.error(chalk.red('❌ Not a valid ScrollCraft project directory (missing scrollcraft.json).'));
+      process.exit(1);
+    }
+
+    const config = await fs.readJson(configPath);
+    if (config.version !== pkg.version) {
+      console.warn(chalk.yellow(`⚠️  Version Mismatch: Project is ${config.version}, CLI is ${pkg.version}`));
+      // In a real implementation, we might offer to upgrade or handle incompatibilities
+    }
+
+    console.log(chalk.dim('Skeletal update implemented. Continuing in next iteration...'));
   });
 
 program.parse(process.argv);

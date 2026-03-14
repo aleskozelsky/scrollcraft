@@ -1,5 +1,5 @@
 /**
- * SCROLLCRAFT 2.0 - DECLARATIVE SCHEMA
+ * SCROLLCRAFT - DECLARATIVE SCHEMA
  * 
  * This file defines the core data structures that allow an AI Agent 
  * to describe a scroll experience in one step.
@@ -13,11 +13,9 @@ export interface ProjectConfiguration {
 }
 
 export interface ProjectSettings {
-    fps: number;
     baseResolution: { width: number; height: number };
     scrollMode: 'vh' | 'px'; // Whether durations are measured in viewport height or pixels
     basePath?: string; // Optional base path for resolving relative asset URLs
-    scrub?: number; // Smooth delay/interpolation factor
 }
 
 /**
@@ -31,13 +29,16 @@ export interface SequenceAsset {
 
 export interface AssetVariant {
     id: string;
-    media: string; // The CSS Media Query this variant targets (e.g. "(max-width: 600px)")
+    media: string; // Keep for fallback/legacy or debugging
     path: string;  // Folder or URL to the optimized image folder
     aspectRatio: string; // e.g. "9:16" or "16:9"
     frameCount: number;
+    width: number;
+    height: number;
+    orientation: 'portrait' | 'landscape';
     hasDepthMap?: boolean;
     // Subject Tracking Data
-    subjects?: string[]; // Array of tracked subject IDs that have corresponding tracking-<id>.json files
+    subjects?: string[]; // Array of tracked subject IDs that have corresponding 000_tracking-[id].json files
 }
 
 export interface SubjectFrameData {

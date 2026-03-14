@@ -2,7 +2,7 @@ import { ProjectConfiguration, SequenceAsset, AssetVariant, SubjectFrameData } f
 import { WebGLRenderer } from './WebGLRenderer';
 
 /**
- * SCROLLCRAFT 2.0 CORE ENGINE
+ * SCROLLCRAFT CORE ENGINE
  * 
  * A declarative, performant engine that maps scroll progress 
  * to high-performance image sequence rendering.
@@ -16,6 +16,7 @@ export class CoreEngine {
     private renderer: WebGLRenderer | null = null;
 
     public basePath: string = '';
+    public scrub: number = 0;
 
     // Playback State
     private targetProgress: number = 0;
@@ -34,9 +35,10 @@ export class CoreEngine {
 
     private boundResize: () => void;
 
-    constructor(config: ProjectConfiguration) {
+    constructor(config: ProjectConfiguration, options: { scrub?: number } = {}) {
         this.config = config;
         this.basePath = config.settings.basePath || '';
+        this.scrub = options.scrub || 0;
         this.detectBestVariant();
 
         this.boundResize = () => {
@@ -74,11 +76,11 @@ export class CoreEngine {
         // Auto-detect base path from URL
         const basePath = configUrl.substring(0, configUrl.lastIndexOf('/'));
         if (!config.settings) {
-            config.settings = { fps: 30, baseResolution: { width: 1920, height: 1080 }, scrollMode: 'vh' };
+            config.settings = { baseResolution: { width: 1920, height: 1080 }, scrollMode: 'vh' };
         }
         config.settings.basePath = config.settings.basePath || basePath;
 
-        const engine = new CoreEngine(config);
+        const engine = new CoreEngine(config, { scrub: typeof config.settings === 'object' ? (config.settings as any).scrub : 0 });
 
         let canvas = container.querySelector('canvas');
         if (!canvas) {
@@ -128,26 +130,42 @@ export class CoreEngine {
     }
 
     /**
-     * ADAPTIVE RENDERING
-     * Selects the best image folder based on current browser media queries.
+     * SMART VARIANT SELECTION
+     * Selects the best image variant based on physical pixel requirements 
+     * and the dimensions of the parent container.
      */
     private detectBestVariant() {
         const firstSequence = this.config.assets[0];
         if (!firstSequence) return;
 
-        const bestMatch = firstSequence.variants.find(v => {
-            return window.matchMedia(v.media).matches;
-        }) || firstSequence.variants[0];
+        // Use the canvas's own layout size, or fallback to window if not attached
+        const rect = this.canvas
+            ? this.canvas.getBoundingClientRect()
+            : { width: window.innerWidth, height: window.innerHeight };
+
+        const isPortrait = rect.height > rect.width;
+        const targetWidth = rect.width * (window.devicePixelRatio || 1);
+
+        // 1. Filter variants by current orientation
+        const candidates = firstSequence.variants.filter(v => {
+            const variantIsPortrait = (v as any).orientation === 'portrait' || (parseInt(v.aspectRatio.split(':')[1]) > parseInt(v.aspectRatio.split(':')[0]));
+            return isPortrait === variantIsPortrait;
+        });
+
+        // 2. Find the best resolution match (smallest variant that is >= targetWidth)
+        candidates.sort((a, b) => a.frameCount - b.frameCount); // Temporary sort placeholder if width is missing, but let's assume we have it in types
+
+        // Let's use width from the variant if available (we'll add it to types)
+        const bestMatch = candidates.find(v => (v as any).width >= targetWidth) || candidates[candidates.length - 1];
 
         if (!bestMatch) {
-            console.warn('[CoreEngine] No best match found');
+            console.warn('[CoreEngine] No suitable variant found');
             return;
-        };
+        }
 
         if (this.activeVariant?.id !== bestMatch.id) {
-            console.log(`🎯 Variant Switched: ${bestMatch.id}`);
+            console.log(`🎯 Variant Switched: ${bestMatch.id} (${isPortrait ? 'Portrait' : 'Landscape'})`);
             this.activeVariant = bestMatch;
-            console.log(`[CoreEngine] Variant hasDepthMap:`, this.activeVariant.hasDepthMap);
             this.clearCache();
             this.preloadInitial();
         }
@@ -176,8 +194,8 @@ export class CoreEngine {
         if (this.destroyed) return;
         this.rafId = requestAnimationFrame(this.updateLoop);
 
-        const scrub = this.config.settings.scrub || 0;
-        
+        const scrub = this.scrub;
+
         if (scrub > 0) {
             // Smooth delay (lower factor = more delay)
             const factor = Math.max(0.01, 1 - scrub);
@@ -236,7 +254,7 @@ export class CoreEngine {
 
         try {
             const prefix = this.basePath ? `${this.basePath}/` : '';
-            const url = `${prefix}${this.activeVariant.path}/tracking-${subjectId}.json`;
+            const url = `${prefix}${this.activeVariant.path}/000_tracking-${subjectId}.json`;
             console.log(`[CoreEngine] Fetching tracking data: ${url}`);
             const res = await fetch(url);
             if (!res.ok) throw new Error(res.statusText);

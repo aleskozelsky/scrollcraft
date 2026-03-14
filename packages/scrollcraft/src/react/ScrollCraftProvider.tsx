@@ -17,6 +17,7 @@ export interface ScrollCraftProviderProps {
     containerHeight?: string;
     canvasHeight?: string;
     offset?: any; // e.g. ["start end", "end start"]
+    scrub?: number;
 }
 
 export const ScrollCraftProvider: React.FC<ScrollCraftProviderProps> = ({
@@ -24,7 +25,8 @@ export const ScrollCraftProvider: React.FC<ScrollCraftProviderProps> = ({
     children,
     containerHeight = '400vh',
     canvasHeight = '100vh',
-    offset = ['start end', 'end start']
+    offset = ['start end', 'end start'],
+    scrub = 0
 }) => {
     const [state, setState] = useState<Omit<SCFTContext, 'engine'>>({ progress: 0, frame: -1 });
     const [engineReady, setEngineReady] = useState(false);
@@ -41,11 +43,11 @@ export const ScrollCraftProvider: React.FC<ScrollCraftProviderProps> = ({
                 const res = await fetch(project);
                 const config = await res.json();
                 const basePath = project.substring(0, project.lastIndexOf('/'));
-                if (!config.settings) config.settings = { fps: 30, baseResolution: { width: 1920, height: 1080 }, scrollMode: 'vh' };
+                if (!config.settings) config.settings = { baseResolution: { width: 1920, height: 1080 }, scrollMode: 'vh' };
                 config.settings.basePath = config.settings.basePath || basePath;
-                activeEngine = new CoreEngine(config);
+                activeEngine = new CoreEngine(config, { scrub });
             } else {
-                activeEngine = new CoreEngine(project);
+                activeEngine = new CoreEngine(project, { scrub });
             }
 
             if (!isMounted) {

@@ -8,31 +8,32 @@ ScrollCraft is a modern animation SDK built for the era of high-performance, age
 
 ## 🚀 Quick Start
 
-Install the package:
+Initialize your project:
 
 ```bash
-npm install scrollcraft
-```
-
-
-```bash
-# 1. Transform your video into 
-npx scft create "examples/sample-media/jabko.mp4" --cloud --depth --prompt "apple" 
-
-# this command will output a folder named scrollcraft-project 
+# 1. Transform your video into a ScrollCraft project
+# This will extract frames, track the subject, and generate optimized variants and depth maps using cloud AI processing.
+npx scft create "your-video.mp4" --name "my-project" --track "apple" --cloud --depth
 ```
 
 ```tsx
-// 2. Drop it into your NextJs app
-import project from './scrollcraft-project/scrollcraft.json';
+// 2. Drop it into your Next.js app
+import project from './my-project/scrollcraft.json';
 import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraft';
 
 const App = () => (
-  <ScrollCraftProvider project={project}>
-    <ScrollCraftCanvas />
-    <SubjectLayer offset={{ x: 10, y: -5 }}>
-       <h2>Pin Element to moving objects.</h2>
-    </SubjectLayer>
+  <ScrollCraftProvider 
+    project={project} 
+    scrub={0.1} // Smooth interpolation (0 = instant, 1 = heavy lag)
+  >
+    <div style={{ height: '400vh' }}>
+      <ScrollCraftCanvas />
+      
+      {/* Automatically follows the 'apple' tracked in the CLI */}
+      <SubjectLayer id="main">
+         <h2>Pinned Element</h2>
+      </SubjectLayer>
+    </div>
   </ScrollCraftProvider>
 );
 ```

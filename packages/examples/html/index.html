@@ -111,7 +111,9 @@
             try {
                 // Initialize ScrollCraft Core Engine using the dynamic static helper
                 // This fetches the JSON and auto-injects an adaptive <canvas> into 'stickyBox'
+                // We pas { scrub: 0.1 } for smooth interpolation
                 const engine = await ScrollCraft.init(stickyBox, './scft-project-apple/scrollcraft.json');
+                engine.scrub = 0.1;
 
                 console.log("ScrollCraft Initialized!", engine);
 

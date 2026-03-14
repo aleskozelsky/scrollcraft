@@ -42,9 +42,7 @@ export default function Home() {
       //scrub={0.5}
       >
         <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-          <ScrollCraftCanvas
-          // style={{ height: '100vh', width: '100vw' }}
-          />
+          <ScrollCraftCanvas />
         </div>
 
         <SubjectLayer id="main" offset={{ x: 0, y: 0 }}>

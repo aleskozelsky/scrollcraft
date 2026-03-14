@@ -22,7 +22,7 @@ export class AssetProcessor {
      * 
      * Creates folders for Mobile, Tablet, Desktop with optimized images.
      */
-    async processVariants(sourceFramesDir: string, trackingData: SubjectFrameData[], options: { step?: number, hasDepth?: boolean } = {}) {
+    async processVariants(sourceFramesDir: string, trackingData: SubjectFrameData[], options: { step?: number, hasDepth?: boolean, variants?: any[] } = {}) {
         const step = options.step || 1;
         const allFiles = await fs.readdir(sourceFramesDir);
         // Ensure we only process regular frames for the main loop
@@ -34,7 +34,7 @@ export class AssetProcessor {
         const variants: AssetVariant[] = [];
 
         // Define our target variants
-        const configs = [
+        const configs = options.variants || [
             { id: 'mobile', width: 720, height: 1280, media: '(max-width: 600px)' },
             { id: 'desktop', width: 1920, height: 1080, media: '(min-width: 601px)' }
         ];
@@ -93,14 +93,17 @@ export class AssetProcessor {
             }
 
             // Extract tracking data into its own file
-            const trackingPath = path.join(variantDir, 'tracking-main.json');
+            const trackingPath = path.join(variantDir, '000_tracking-main.json');
             await fs.writeJson(trackingPath, variantTracking, { spaces: 2 });
 
             variants.push({
                 id: config.id,
                 media: config.media,
+                width: config.width,
+                height: config.height,
+                orientation: config.orientation,
                 path: `./${config.id}`, // Relative path in the final output
-                aspectRatio: config.id === 'mobile' ? '9:16' : '16:9',
+                aspectRatio: config.aspectRatio,
                 frameCount: framesToProcess.length,
                 hasDepthMap: options.hasDepth,
                 subjects: ['main']
@@ -127,7 +130,6 @@ export class AssetProcessor {
         const config: ProjectConfiguration = {
             version: pkg.version,
             settings: {
-                fps: 30,
                 baseResolution: { width: 1920, height: 1080 },
                 scrollMode: 'vh'
             },

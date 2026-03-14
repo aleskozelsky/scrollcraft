@@ -10,7 +10,7 @@ For an AI to successfully build an experience, it must follow these two phases:
 The agent should first use the CLI to process raw media into an intelligent ScrollCraft project.
 ```bash
 # Example: Process a video with AI tracking and depth maps
-npx scft create input.mp4 --cloud --depth --prompt "main product"
+npx scft create input.mp4 --name "my-project" --track "main product" --cloud --depth
 ```
 **Output:** A directory containing optimized frames, depth maps, and a `scrollcraft.json` file.
 
@@ -22,7 +22,7 @@ import project from './scrollcraft-project/scrollcraft.json';
 import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraft';
 
 export const MyExperience = () => (
-  <ScrollCraftProvider project={project}>
+  <ScrollCraftProvider project={project} scrub={0.1}>
     <div style={{ height: '300vh' }}>
       <div style={{ sticky: 'top-0', height: '100vh' }}>
         <ScrollCraftCanvas />

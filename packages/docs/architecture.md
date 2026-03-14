@@ -12,7 +12,7 @@ The heart of every project is a JSON file that describes the entire experience. 
 ### Core Schema Overview
 The engine expects a `ProjectConfiguration` object (defined in `src/core/types.ts`):
 
-- **`settings`**: FPS, base resolutions, and scroll modes.
+- **`settings`**: Base resolutions, scroll modes, and base path.
 - **`assets`**: An array of `SequenceAsset` with multiple `variants` (Mobile vs Desktop).
 - **`timeline`**: A map of `scenes` and `layers`.
 
@@ -27,9 +27,9 @@ In v2.0, state management is separated from pixels.
 3.  **UI Components**: `<ScrollCraftCanvas />` and `<SubjectLayer />` represent the "view." You can have multiple view layers tied to the same engine state.
 
 ### How it works:
-1.  **Detection**: On initialization and window resize, the engine checks Browser Media Queries.
-2.  **Selection**: It selects the folder (e.g., `./mobile` or `./desktop`) that matches the user's screen.
-3.  **Hot-Swapping**: If the user rotates their phone, the engine swaps to the new image folder and tracking data without losing the current scroll position.
+1.  **Detection**: On initialization and resize, the engine calculates the required **Physical Resolution** (`width * devicePixelRatio`) and checks the `canvas` element's own dimensions.
+2.  **Selection**: It selects the variant that best matches or exceeds the required resolution for the current orientation (Portrait vs Landscape).
+3.  **Hot-Swapping**: If the container size changes or the phone is rotated, the engine immediately swaps to the better-fit image folder without losing scroll place.
 
 ---
 

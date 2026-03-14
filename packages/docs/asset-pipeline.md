@@ -11,11 +11,13 @@ npx scft create <input> [options]
 ```
 
 ### Options:
-- `-o, --output <dir>`: Target directory (default: `./scrollcraft-project`).
-- `-p, --prompt <text>`: Target object to track (e.g. "red car").
-- `-s, --step <number>`: Process every Nth frame. **VITAL for performance**. (e.g. `--step 2` reduces footprint by 50%).
+- `-n, --name <string>`: Name of the project.
+- `-p, --track <text>`: Target object to track (e.g. "red car").
+- `-v, --variants <string>`: Comma-separated target resolutions (e.g. `720,1080`).
+- `-s, --step <number>`: Process every Nth frame. **VITAL for performance**.
 - `--cloud`: Use Fal.ai for tracking (requires `FAL_KEY`).
 - `--depth`: Generate a corresponding image sequence of depth maps for the 3D parallax effect.
+- `-o, --output <dir>`: (Deprecated) Target directory.
 
 ### What it does:
 1.  **Auto-Upload**: If you provide a local `.mp4`, it's automatically uploaded to the cloud for processing.
@@ -23,7 +25,7 @@ npx scft create <input> [options]
 3.  **AI Tracking**: Identifies the main subject (using **SAM 3**). Our engine now features **Sticky Tracking**—if the subject is obscured for a few frames, the coordinates hold their last known position.
 4.  **Variant Generation**: 
     - **Smart Crop**: Centers the images based on the tracked subject.
-    - **Resolution Scaling**: Creates 720p (Mobile) and 2160p (4K Desktop) folders.
+    - **Resolution Factory**: Creates Portrait (9:16) and Landscape (16:9) pairs for each target resolution (e.g. 720p, 1080p).
     - **Compression**: Optimized `.webp` generation.
 5.  **Metadata Export**: Generates the final `scrollcraft.json` with **root-relative paths** for easier deployment.
 
