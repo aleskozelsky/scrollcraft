@@ -12,7 +12,7 @@ Before writing any UI code, you MUST process the raw assets (video or images) in
 ```bash
 npx scft create <input_path> --cloud --depth --prompt "main subject" [-s 2]
 ```
-- **Why?** This generates optimized multi-resolution frames, AI-tracked subject coordinates, and depth maps.
+- **Why?** This generates optimized multi-resolution frames, optional AI-tracked subject coordinates, and optional depth maps.
 - **Output**: A directory containing `scrollcraft.json` and variant folders (`mobile/`, `desktop/`).
 
 ### Step 2: Project Architecture (React)
