@@ -14,15 +14,39 @@ npm install scrollcraft
 
 ---
 
-## Quick Start
+## The Universal Asset Pipeline
 
-Initialize your project:
+ScrollCraft features a **Universal Asset Pipeline** that runs identical logic in both the **CLI** (Node.js) and the **Browser** (ideal for CMS integrations like WordPress).
+
+### 1. CLI Usage (Node.js)
+Transform your video into a ScrollCraft project from your terminal:
 
 ```bash
-# 1. Transform your video into a ScrollCraft project
-# This will extract frames, track the subject, and generate optimized variants and depth maps using cloud AI processing.
+# This will extract frames, track the subject, and generate optimized variants and depth maps.
 npx scft create "your-video.mp4" --name "my-project" --track "apple" --cloud --depth
 ```
+
+### 2. Programmatic Usage (Browser/Node)
+You can also import the pipeline into your own React apps or dashboard:
+
+```javascript
+import { AssetPipeline } from 'scrollcraft/pipeline';
+
+const pipeline = new AssetPipeline({
+  apiKey: process.env.FAL_KEY,
+  onProgress: (p) => console.log(`${p.step}: ${p.percent}%`)
+});
+
+// Returns the project configuration or a ZIP blob
+const project = await pipeline.create({
+  input: videoFile, // Can be a File object or Path
+  name: "my-project",
+  variants: [720, 1080],
+  outputZip: true // Perfect for CMS uploads
+});
+```
+
+---
 
 ```tsx
 // 2. Drop it into your Next.js app

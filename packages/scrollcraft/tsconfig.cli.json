@@ -12,6 +12,7 @@
     },
     "include": [
         "./src/cli/**/*",
+        "./src/pipeline/**/*",
         "./src/core/types.ts"
     ]
 }
