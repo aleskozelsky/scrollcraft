@@ -175,7 +175,7 @@ program
     const pipeline = new AssetPipeline({
       apiKey: process.env.FAL_KEY,
       onProgress: (p: any) => {
-          // You could add a progress bar here
+        // You could add a progress bar here
       }
     });
 
@@ -224,7 +224,7 @@ program
     console.log(chalk.red('⚠️  UNDER CONSTRUCTION'));
     console.log(chalk.yellow('The "update" command is currently being refactored for the Universal Pipeline.'));
     console.log(chalk.dim('Please use "scft create" to regenerate your project for now.\n'));
-    
+
     process.exit(0);
   });
 

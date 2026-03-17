@@ -52,12 +52,12 @@ export class NodeDriver implements IPipelineDriver {
     return new Promise((resolve, reject) => {
       // For simplicity, we use execSync in a promise or spawn for progress
       try {
-          // ffmpeg -i input output%04d.png
-          // For now, let's keep it simple like existing CLI
-          execSync(`"${this.ffmpegPath}" -i "${videoSource}" "${outputDir}/frame_%04d.png"`, { stdio: 'inherit' });
-          resolve();
+        // ffmpeg -i input output%04d.png
+        // For now, let's keep it simple like existing CLI
+        execSync(`"${this.ffmpegPath}" -i "${videoSource}" "${outputDir}/frame_%04d.png"`, { stdio: 'inherit' });
+        resolve();
       } catch (err) {
-          reject(err);
+        reject(err);
       }
     });
   }

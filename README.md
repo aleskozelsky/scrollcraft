@@ -32,8 +32,8 @@ You can also import the pipeline into your own React apps or dashboard:
 ```javascript
 import { AssetPipeline } from 'scrollcraft/pipeline';
 
-const pipeline = new AssetPipeline({
-  apiKey: process.env.FAL_KEY,
+const pipeline = new AssetPipeline({ 
+  apiKey: process.env.FAL_KEY, 
   onProgress: (p) => console.log(`${p.step}: ${p.percent}%`)
 });
 
@@ -56,7 +56,7 @@ import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraf
 const App = () => (
   <ScrollCraftProvider 
     project={project} 
-    scrub={0.1} // Smooth interpolation (0 = instant, 1 = heavy lag)
+    scrub={0.1} // Smooth interpolation (0 = instant, 1 = 1 second lag)
   >
     <div style={{ height: '400vh' }}>
       <ScrollCraftCanvas />
@@ -77,13 +77,13 @@ const App = () => (
 Choose your path based on your role:
 
 ### 👤 For Humans
-- [**Core Architecture**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/architecture/page.md): Understand the state-snapshot engine.
-- [**Asset Pipeline**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/asset-pipeline/page.md): Learn how to use the CLI and AI tracking.
-- [**React Hooks**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/react-integration/page.md): Build custom interactive components.
+- [**Core Architecture**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/content/architecture.md): Understand the state-snapshot engine.
+- [**Asset Pipeline**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/content/asset-pipeline.md): Learn how to use the CLI and AI tracking.
+- [**React Hooks**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/content/react-integration.md): Build custom interactive components.
 
 ### 🤖 For AI Agents
 - [**AGENTS.md**](https://github.com/aleskozelsky/scrollcraft/blob/main/AGENTS.md): Technical standard operating procedures for the repository.
-- [**AI Integration Protocol**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/ai-integration/page.md): How to prompt agents to build scenes for you.
+- [**AI Integration Protocol**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/content/ai-integration.md): How to prompt agents to build scenes for you.
 
 ---
 

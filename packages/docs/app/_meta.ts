@@ -1,7 +1,7 @@
 export default {
   "index": "Getting Started",
-  'asset-pipeline': 'Asset Pipeline',
   'architecture': 'Architecture',
+  'asset-pipeline': 'Asset Pipeline',
   'react-integration': 'React Integration',
   'ai-integration': 'AI Integration'
 }
