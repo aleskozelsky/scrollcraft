@@ -97,7 +97,7 @@ export class FalService {
         });
 
         // Debug output to see what Fal is actually returning
-        await fs.writeFile('debug_fal.json', JSON.stringify(result, null, 2));
+        //await fs.writeFile('debug_fal.json', JSON.stringify(result, null, 2));
 
         const payload = result.data || result;
         if (!payload.video || !payload.video.url) {

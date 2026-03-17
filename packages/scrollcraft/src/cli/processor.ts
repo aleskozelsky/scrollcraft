@@ -78,8 +78,9 @@ export class AssetProcessor {
                                 fit: 'cover',
                                 position: this.subjectToSharpPosition(subject)
                             })
-                            // We grayscale and save as webp
+                            // Grayscale, then blur slightly to prevent "staircase" effects in displacement
                             .grayscale()
+                            .blur(2)
                             .webp({ quality: 80 })
                             .toFile(depthTargetPath);
                     }

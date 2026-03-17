@@ -35,14 +35,16 @@ export default function Home() {
 
       {/* The Scroll Sequence */}
       <ScrollCraftProvider
-        project="/scrollcraft-project-apple/scrollcraft.json"
+        project="/hack4/scrollcraft.json"
         containerHeight="400vh"
         canvasHeight="100vh"
         offset={["start end", "end start"]} // motion.dev tracking offsets
       //scrub={0.5}
       >
         <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-          <ScrollCraftCanvas />
+          <ScrollCraftCanvas
+          // assetId="main-sequence" // (optional?)
+          />
         </div>
 
         <SubjectLayer id="main" offset={{ x: 0, y: 0 }}>

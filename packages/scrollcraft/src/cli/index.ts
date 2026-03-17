@@ -14,15 +14,9 @@ import 'dotenv/config';
 const pkg = require('../../package.json');
 
 /**
- * VARIANT PRESETS & MEDIA QUERY BUILDER
+ *  MEDIA QUERY BUILDER
  */
-const DEVICE_PRESETS: Record<string, { width: number; height: number; threshold: number }> = {
-  mobile:  { width: 720,  height: 1280, threshold: 600 },
-  tablet:  { width: 1024, height: 1366, threshold: 1024 },
-  laptop:  { width: 1440, height: 900,  threshold: 1440 },
-  desktop: { width: 1920, height: 1080, threshold: 1920 },
-  '4k':    { width: 3840, height: 2160, threshold: 99999 },
-};
+
 
 function buildVariantsFromIds(input: (string | number | any)[]): any[] {
   const result: any[] = [];
@@ -41,7 +35,7 @@ function buildVariantsFromIds(input: (string | number | any)[]): any[] {
       const isPortrait = orient === 'portrait';
       const width = isPortrait ? res : Math.round(res * (16 / 9));
       const height = isPortrait ? Math.round(res * (16 / 9)) : res;
-      
+
       result.push({
         id: `${res}p_${orient.substring(0, 1)}`,
         width,
@@ -151,7 +145,8 @@ program
     let input = inputArg;
     let track = opts.track;
     let projectName = opts.name;
-    let useCloud = opts.cloud;
+    let useTracking = opts.cloud; // Default to cloud if flag set
+    let useDepth = opts.depth;
     let customVariants = projectConfig?.variants || (opts.variants ? buildVariantsFromIds(opts.variants.split(',')) : null);
 
     // 1. INPUT VALIDATION (Immediate)
@@ -175,11 +170,19 @@ program
       step = parseInt(stepInput) || 1;
     }
 
-    // Interactive AI Decision
-    if (!useCloud && !inputArg) {
-      const aiChoice = await prompt('Use AI Cloud for tracking/depth? (requires FAL_KEY) [y/N]', 'n');
-      useCloud = aiChoice.toLowerCase() === 'y';
+    // Interactive AI Decisions (if not passed as flags)
+    if (!inputArg) {
+      if (!opts.cloud) {
+        const trackChoice = await prompt('Use AI Cloud for Subject Tracking? (requires FAL_KEY) [y/N]', 'n');
+        useTracking = trackChoice.toLowerCase() === 'y';
+      }
+      if (!opts.depth) {
+        const depthChoice = await prompt('Use AI Cloud for Depth Map generation? [y/N]', 'n');
+        useDepth = depthChoice.toLowerCase() === 'y';
+      }
     }
+
+    const useCloud = useTracking || useDepth;
 
     // Interactive Variant Selection (if not in config)
     if (!customVariants && !inputArg) {
@@ -200,7 +203,7 @@ program
         if (key) process.env.FAL_KEY = key;
       }
 
-      if (!opts.track || opts.track === 'main subject') {
+      if (useTracking && (!opts.track || opts.track === 'main subject')) {
         const customTrack = await prompt('What subject should we track?', 'main subject');
         track = customTrack;
       }
@@ -225,7 +228,7 @@ program
       } else {
         console.log(chalk.yellow(`📂 Using images from: ${input}`));
 
-        if (useCloud || opts.depth) {
+        if (useCloud) {
           console.error(chalk.red('\n❌ AI Cloud features (tracking/depth) currently require a video file as input.'));
           console.log(chalk.yellow('To use a directory of images, please use local mode (disable AI during prompts or don\'t use --cloud).'));
           process.exit(1);
@@ -255,10 +258,16 @@ program
         const fal = new FalService();
 
         // Tracking
-        trackingData = await fal.trackSubject(input, track);
+        if (useTracking) {
+          trackingData = await fal.trackSubject(input, track);
+        } else {
+          console.log(chalk.dim('ℹ️  Cloud tracking skipped. Using center-pinned defaults.'));
+          const frames = (await fs.readdir(tempDir)).filter(f => f.startsWith('frame_'));
+          trackingData = frames.map((_, i) => ({ frame: i, x: 0.5, y: 0.5, scale: 0 }));
+        }
 
         // Depth Map
-        if (opts.depth) {
+        if (useDepth) {
           console.log(chalk.yellow(`\n🕳️  Generating Depth Map via AI...`));
           const depthUrl = await fal.generateDepthMap(input);
           console.log(chalk.yellow(`📥 Downloading Depth Map Video...`));
