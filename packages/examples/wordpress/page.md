@@ -80,10 +80,10 @@ $wrapper_attributes = get_block_wrapper_attributes([
 ```
 
 ### 3. view.js (Frontend Initialization)
-Uses the `@scrollcraft/core` package directly.
+Uses the `scrollcraft` package directly.
 
 ```javascript
-import { CoreEngine } from '@scrollcraft/core';
+import { CoreEngine } from 'scrollcraft';
 import { scroll } from 'motion';
 
 const initScrollCraft = async (el) => {

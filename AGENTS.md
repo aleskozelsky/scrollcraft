@@ -19,7 +19,7 @@ npx scft create <input_path> --cloud --depth --prompt "main subject" [-s 2]
 Import the generated `scrollcraft.json` and wrap your scene in the `ScrollCraftProvider`.
 ```tsx
 import project from './path/to/scrollcraft.json';
-import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraft';
+import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraft/react';
 
 // Goal: 1 ScrollCraftProvider per interactive section.
 ```
@@ -31,10 +31,10 @@ Use high-level components to build the scene. Avoid manual coordinate math.
 - **`useScrollCraft()`**: Hook for custom triggers based on `progress` (0-1) or `frame`.
 
 ## 📚 Essential Reading
-- [**Core Architecture**](docs/architecture.md): Understand the State-Snapshot Engine.
-- [**Asset Pipeline**](docs/asset-pipeline.md): Detailed CLI options (Smart-Crop, Variants, Step).
-- [**React Integration**](docs/react-integration.md): Component API reference.
-- [**AI Protocol**](docs/ai-integration.md): How to prompt other agents to build creative scenes for you.
+- [**Core Architecture**](packages/docs/app/architecture/page.md): Understand the State-Snapshot Engine.
+- [**Asset Pipeline**](packages/docs/app/asset-pipeline/page.md): Detailed CLI options (Smart-Crop, Variants, Step).
+- [**React Integration**](packages/docs/app/react-integration/page.md): Component API reference.
+- [**AI Protocol**](packages/docs/app/ai-integration/page.md): How to prompt other agents to build creative scenes for you.
 
 ## ⚠️ Critical Constraints
 1. **Coordination System**: ALWAYS use percentages (0-100) for Layer offsets relative to the Subject Focal Point.

@@ -19,7 +19,7 @@ The agent then uses the generated JSON to build the UI components.
 
 ```tsx
 import project from './scrollcraft-project/scrollcraft.json';
-import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraft';
+import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraft/react';
 
 export const MyExperience = () => (
   <ScrollCraftProvider project={project} scrub={0.1}>

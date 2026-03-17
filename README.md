@@ -51,7 +51,7 @@ const project = await pipeline.create({
 ```tsx
 // 2. Drop it into your Next.js app
 import project from './my-project/scrollcraft.json';
-import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraft';
+import { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer } from 'scrollcraft/react';
 
 const App = () => (
   <ScrollCraftProvider 
@@ -77,13 +77,13 @@ const App = () => (
 Choose your path based on your role:
 
 ### 👤 For Humans
-- [**Core Architecture**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/docs/architecture/page.md): Understand the state-snapshot engine.
-- [**Asset Pipeline**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/docs/asset-pipeline/page.md): Learn how to use the CLI and AI tracking.
-- [**React Hooks**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/docs/react-integration/page.md): Build custom interactive components.
+- [**Core Architecture**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/architecture/page.md): Understand the state-snapshot engine.
+- [**Asset Pipeline**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/asset-pipeline/page.md): Learn how to use the CLI and AI tracking.
+- [**React Hooks**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/react-integration/page.md): Build custom interactive components.
 
 ### 🤖 For AI Agents
 - [**AGENTS.md**](https://github.com/aleskozelsky/scrollcraft/blob/main/AGENTS.md): Technical standard operating procedures for the repository.
-- [**AI Integration Protocol**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/docs/ai-integration/page.md): How to prompt agents to build scenes for you.
+- [**AI Integration Protocol**](https://github.com/aleskozelsky/scrollcraft/blob/main/packages/docs/app/ai-integration/page.md): How to prompt agents to build scenes for you.
 
 ---
 
