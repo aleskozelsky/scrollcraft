@@ -32,6 +32,7 @@ export class CoreEngine {
 
     // Event hooks
     public onFrameChange?: (frame: number, progress: number) => void;
+    public onProgressUpdate?: (progress: number) => void;
 
     private boundResize: () => void;
 
@@ -206,6 +207,10 @@ export class CoreEngine {
 
         if (Math.abs(this.targetProgress - this.currentProgress) < 0.0001) {
             this.currentProgress = this.targetProgress;
+        }
+
+        if (this.onProgressUpdate) {
+            this.onProgressUpdate(this.currentProgress);
         }
 
         this.calculateFrame(this.currentProgress);

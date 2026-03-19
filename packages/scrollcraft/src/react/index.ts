@@ -1,1 +1,1 @@
-export { ScrollCraftProvider, ScrollCraftCanvas, SubjectLayer, useScrollCraft } from './ScrollCraftProvider';
+export { ScrollCraftProvider, ScrollCraftCanvas, ScrollCraftLayer, ScrollCraftLayerTracking, SubjectLayer, useScrollCraft } from './ScrollCraftProvider';

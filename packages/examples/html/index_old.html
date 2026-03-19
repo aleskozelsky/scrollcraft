@@ -27,12 +27,15 @@
         /* The container determines how long the scroll effect lasts */
         #scft-container {
             position: relative;
+            height: 400vh;
         }
 
         /* The canvas inside is sticky to remain visible while scrolling the container */
-        #scft-container_inner_sticky {
+        #scft-sticky {
             position: sticky;
             top: 0;
+            height: 100vh;
+            width: 100%;
             overflow: hidden;
         }
 
@@ -75,35 +78,14 @@
     </div>
 
     <!-- The Scroll Container -->
-    <div class="scft-container" style="height:400vh"
-        data-scft-container="remaining attributes here as in the react part">
+    <div id="scft-container">
+
         <!-- The Sticky Viewport -->
-        <div class="scft-container_inner_sticky" style="height:100vh;width:100%">
-            <!-- Layer (non tracking)-->
-            <div class="scft-layer" style="justify-content: center; align-items: center"
-                data-scft-layer="remaining attributes here as in react">
-                <div class="scft-canvas" style="width:100%; height:100%"
-                    data-scft-canvas="remaining attributes here, project etc...">
-                    <!-- CoreEngine will dynamically inject the <canvas> here -->
-                </div>
-            </div>
-
+        <div id="scft-sticky">
             <!-- Overlay that will naturally lock to the 'main' subject -->
-            <div class="scft-layer-tracking" data-scft-layer-tracking="id">
-                <div class="apple-overlay">🍎 Apple Tracking</div>
-            </div>
+            <div id="apple-overlay">🍎 Apple Tracking</div>
 
-
-            <!-- Layer (non tracking )-->
-            <div class="scft-layer" style="justify-content: left; align-items: end;"
-                data-scft-layer="remaining attributes here as in react">
-
-                <h1>Hello world</h1>
-                <p>how are you? (not sure about the justify content and align items, but hey, this is just a
-                    brainstorm.)</p>
-            </div>
-
-
+            <!-- CoreEngine will dynamically inject the <canvas> here -->
         </div>
 
     </div>
@@ -119,28 +101,12 @@
          For this demo, let's write a small native tracker or use the CDN version) -->
     <script type="module">
         import ScrollCraft from '../../scrollcraft/src/core/index.ts';
+        import { scroll } from 'https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm';
 
         document.addEventListener('DOMContentLoaded', async () => {
-
-            // look for any of the data-scft elements (they are the building blocks)
-            // read the data, store the element references and 
-            // initialize them one by one, or all at once in series i am not sure 
-
-
-            // then ScrollCraft.useScrollCraft or some similar method to animate the canvas/engine
-            // I haven't thought it through completely yet. 
-
-        })
-
-        // This really changes a lot, so I delete it. 
-
-        /*
-        import { scroll } from 'https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm'; // i wonder, if this library can be bundles inside the library and made asscessibe ie: ScrollCraft.motion or ScrollCraft.useScrollCraft and give frame and progress values?
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const container = document.getElementByClassName('scft-container'); // using classes instead of ids, there can be multiple scrollcrafts on a page
-            const stickyBox = document.getElementByClassName('scft-sticky');
-            const overlay = document.getElementByClassName('apple-overlay');
+            const container = document.getElementById('scft-container');
+            const stickyBox = document.getElementById('scft-sticky');
+            const overlay = document.getElementById('apple-overlay');
 
             try {
                 // Initialize ScrollCraft Core Engine using the dynamic static helper
@@ -184,7 +150,7 @@
                 console.error("Failed to load ScrollCraft", err);
             }
 
-        }); */
+        });
     </script>
 </body>
 

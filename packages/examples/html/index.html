@@ -27,15 +27,12 @@
         /* The container determines how long the scroll effect lasts */
         #scft-container {
             position: relative;
-            height: 400vh;
         }
 
         /* The canvas inside is sticky to remain visible while scrolling the container */
-        #scft-sticky {
+        #scft-container_inner_sticky {
             position: sticky;
             top: 0;
-            height: 100vh;
-            width: 100%;
             overflow: hidden;
         }
 
@@ -78,78 +75,50 @@
     </div>
 
     <!-- The Scroll Container -->
-    <div id="scft-container">
-
+    <div class="scft-container" style="height:400vh" data-scft-offset='["start end", "end start"]'>
         <!-- The Sticky Viewport -->
-        <div id="scft-sticky">
+        <div class="scft-container_inner_sticky" style="height:100vh;width:100%">
+            <!-- Layer (non tracking)-->
+            <div class="scft-layer" style="display: flex; justify-content: center; align-items: center">
+                <div class="scft-canvas" style="width:100%; height:100%" data-scft-canvas="/jabko2/scrollcraft.json">
+                    <!-- CoreEngine will dynamically inject the <canvas> here -->
+                </div>
+            </div>
+
             <!-- Overlay that will naturally lock to the 'main' subject -->
-            <div id="apple-overlay">🍎 Apple Tracking</div>
+            <div class="scft-layer-tracking" data-scft-layer-tracking="main">
+                <div id="apple-overlay" style="display: block">🍎 Apple Tracking</div>
+            </div>
 
-            <!-- CoreEngine will dynamically inject the <canvas> here -->
+            <!-- Layer (non tracking )-->
+            <div class="scft-layer"
+                style="display: flex; justify-content: flex-start; align-items: flex-end; padding: 10vh;">
+                <div data-scft-animate='{"opacity": [0, 1, 1, 0]}'>
+                    <h1 style="font-size: 3rem; margin: 0;">Hello world</h1>
+                    <p style="opacity: 0.7;">This is now a fully functional Vanilla example!</p>
+                </div>
+            </div>
         </div>
-
     </div>
+
 
     <div class="outro">
         <h2>End of Sequence</h2>
     </div>
 
-    <!-- Vite will resolve this relative path to the library automatically -->
-
-    <!-- Import Motion for Scroll Tracking (Lightweight vanilla) -->
-    <!-- (Normally you'd import 'motion' via npm/ESM, but we'll use a cdn or a simple intersection observer fallback if not present. 
-         For this demo, let's write a small native tracker or use the CDN version) -->
+    <!-- Vite will resolve this relative path to the typescript source automatically -->
     <script type="module">
         import ScrollCraft from '../../scrollcraft/src/core/index.ts';
-        import { scroll } from 'https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm';
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const container = document.getElementById('scft-container');
-            const stickyBox = document.getElementById('scft-sticky');
-            const overlay = document.getElementById('apple-overlay');
+            console.log("Initializing ScrollCraft...");
 
             try {
-                // Initialize ScrollCraft Core Engine using the dynamic static helper
-                // This fetches the JSON and auto-injects an adaptive <canvas> into 'stickyBox'
-                // We pas { scrub: 0.1 } for smooth interpolation
-                const engine = await ScrollCraft.init(stickyBox, './scft-project-apple/scrollcraft.json');
-                engine.scrub = 0.1;
-
-                console.log("ScrollCraft Initialized!", engine);
-
-                // Option: Request Subject Tracking
-                await engine.loadTrackingData('main');
-                overlay.style.display = 'block';
-
-                // Hook up the vanilla motion framework to map scroll to our engine's progress
-                scroll(
-                    (progress) => {
-                        // Forward progress to the engine via custom scrub looping
-                        engine.update(progress);
-                    },
-                    {
-                        target: container,
-                        offset: ['start end', 'end start'] // Standard container interception points
-                    }
-                );
-
-                // Update UI frame overlays by hooking to render pass
-                engine.onFrameChange = (frame, progress) => {
-                    const coords = engine.getTrackedCoords('main', frame);
-
-                    // Update tracked DIV position
-                    // Remember coordinates are 0 - 1 values based on the 100vh sticky box
-                    overlay.style.left = `${coords.x * 100}%`;
-                    overlay.style.top = `${coords.y * 100}%`;
-                };
-
-                // Example: How to clean up later if destroying
-                // engine.destroy(); // unmounts observers, frees WebGL contexts
-
-            } catch (err) {
-                console.error("Failed to load ScrollCraft", err);
+                const orchestrators = await ScrollCraft.CoreOrchestrator.initAll();
+                console.log("ScrollCraft Initialized!", orchestrators);
+            } catch (e) {
+                console.error("Failed to boot ScrollCraft: ", e);
             }
-
         });
     </script>
 </body>
